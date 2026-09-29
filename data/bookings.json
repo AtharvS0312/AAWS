@@ -1,5 +1,35 @@
 [
   {
+    "booking_id": "TG-BUS-E2BA50",
+    "email": "demo@travelgo.com",
+    "type": "bus",
+    "source": "Hyderabad",
+    "destination": "Bangalore",
+    "date": "2026-10-15",
+    "seat": "L-08 (Window)",
+    "details": "VRL Travels \u2022 Multi-Axle Volvo",
+    "price": 1312.5,
+    "payment_method": "UPI / Google Pay",
+    "payment_reference": "PAY-907FDAE2C",
+    "status": "CONFIRMED",
+    "created_at": "2026-09-29 20:09:40"
+  },
+  {
+    "booking_id": "TG-BUS-931C83",
+    "email": "demo@travelgo.com",
+    "type": "bus",
+    "source": "Hyderabad",
+    "destination": "Bangalore",
+    "date": "2026-10-15",
+    "seat": "L-08 (Window)",
+    "details": "VRL Travels \u2022 Multi-Axle Volvo",
+    "price": 1312.5,
+    "payment_method": "UPI / Google Pay",
+    "payment_reference": "PAY-72C1F2E49",
+    "status": "CONFIRMED",
+    "created_at": "2026-09-29 20:06:42"
+  },
+  {
     "booking_id": "TG-BUS-977D99",
     "email": "demo@travelgo.com",
     "type": "bus",

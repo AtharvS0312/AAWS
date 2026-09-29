@@ -125,6 +125,27 @@ To deploy for high-availability production on EC2:
 gunicorn --bind 0.0.0.0:8000 app:app
 ```
 
+## 🌐 Deployment on Render (render.com)
+
+TravelGo is configured for deployment on **Render**:
+
+### Option A: Automatic Blueprint Deployment
+1. Push your repository to **GitHub**.
+2. Log into [Render Dashboard](https://dashboard.render.com).
+3. Click **New +** -> **Blueprint**.
+4. Connect your GitHub repository. Render will automatically detect [`render.yaml`](file:///c:/Vedant78/AAWS/render.yaml) and configure the web service.
+
+### Option B: Manual Web Service Setup
+- **Environment**: `Python`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `gunicorn app:app`
+- **Environment Variables** (Optional for AWS integration):
+  - `SECRET_KEY`: Set a secure random string.
+  - `AWS_DEFAULT_REGION`: `us-east-1`
+  - `AWS_ACCESS_KEY_ID`: *(Optional)* Your AWS Access Key
+  - `AWS_SECRET_ACCESS_KEY`: *(Optional)* Your AWS Secret Key
+  - `TRAVELGO_SNS_TOPIC_ARN`: *(Optional)* Your AWS SNS Topic ARN
+
 ---
 
 ## 🧪 Running Automated Tests
@@ -132,3 +153,4 @@ Run the included test suite to verify all routes, booking flows, and SNS handler
 ```bash
 python test_app.py
 ```
+
