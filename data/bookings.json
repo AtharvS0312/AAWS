@@ -1,0 +1,47 @@
+[
+  {
+    "booking_id": "TG-BUS-977D99",
+    "email": "demo@travelgo.com",
+    "type": "bus",
+    "source": "Hyderabad",
+    "destination": "Bangalore",
+    "date": "2026-10-15",
+    "seat": "L-08 (Window)",
+    "details": "VRL Travels \u2022 Multi-Axle Volvo",
+    "price": 1312.5,
+    "payment_method": "UPI / Google Pay",
+    "payment_reference": "PAY-965C0BFD1",
+    "status": "CONFIRMED",
+    "created_at": "2026-09-26 22:23:27"
+  },
+  {
+    "booking_id": "TG-BUS-98231",
+    "email": "demo@travelgo.com",
+    "type": "bus",
+    "source": "Hyderabad",
+    "destination": "Bangalore",
+    "date": "2026-10-15",
+    "seat": "L-08 (Window)",
+    "details": "VRL Travels \u2022 Multi-Axle Volvo AC Sleeper",
+    "price": 1250,
+    "payment_method": "Credit Card",
+    "payment_reference": "PAY-874920193",
+    "status": "CONFIRMED",
+    "created_at": "2026-09-20 14:30:00"
+  },
+  {
+    "booking_id": "TG-HTL-44129",
+    "email": "demo@travelgo.com",
+    "type": "hotel",
+    "source": "Chennai",
+    "destination": "Chennai",
+    "date": "2026-10-20",
+    "seat": "Deluxe Sea View Room 304",
+    "details": "The Grand Palace Resort \u2022 4 Star Luxury",
+    "price": 4500,
+    "payment_method": "UPI / GPay",
+    "payment_reference": "PAY-992104812",
+    "status": "CONFIRMED",
+    "created_at": "2026-09-22 09:15:00"
+  }
+]

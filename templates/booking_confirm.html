@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout & Payment | TravelGo{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 2rem auto; padding: 0 1.5rem;">
+  
+  <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+    <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
+      <i class="fas fa-credit-card" style="color: var(--primary);"></i> Complete Your Travel Booking
+    </h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+      Review your travel itinerary below. Upon confirmation, a real-time email notification will be published via <strong>AWS Simple Notification Service (SNS)</strong>.
+    </p>
+
+    <!-- ITINERARY BREAKDOWN -->
+    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; color: white;">Itinerary Details</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+        <div>
+          <span style="color: var(--text-muted); display: block;">Booking Type</span>
+          <strong style="text-transform: uppercase; color: var(--accent-cyan);">{{ booking.type }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Route / Location</span>
+          <strong>{{ booking.source }} ➔ {{ booking.destination }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Travel Date</span>
+          <strong>{{ booking.date }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Seat / Room Info</span>
+          <strong style="color: var(--primary);">{{ booking.seat }}</strong>
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--bg-card-border); font-size: 0.88rem; color: var(--text-muted);">
+        <i class="fas fa-info-circle"></i> {{ booking.details }}
+      </div>
+    </div>
+
+    <!-- FARE BREAKDOWN -->
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Payment Summary</h3>
+      
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Base Fare:</span>
+          <span>₹{{ "{:,.2f}".format(booking.base_price) }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Taxes & Travel Insurance (5% GST):</span>
+          <span>₹{{ "{:,.2f}".format(booking.tax) }}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; border-top: 1px solid var(--bg-card-border); padding-top: 0.75rem; color: white;">
+          <span>Total Payable Amount:</span>
+          <span style="color: var(--accent-emerald);">₹{{ "{:,.2f}".format(booking.price) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT METHOD SELECTION FORM -->
+    <form action="{{ url_for('process_booking') }}" method="POST">
+      <input type="hidden" name="type" value="{{ booking.type }}">
+      <input type="hidden" name="source" value="{{ booking.source }}">
+      <input type="hidden" name="destination" value="{{ booking.destination }}">
+      <input type="hidden" name="date" value="{{ booking.date }}">
+      <input type="hidden" name="seat" value="{{ booking.seat }}">
+      <input type="hidden" name="details" value="{{ booking.details }}">
+      <input type="hidden" name="price" value="{{ booking.price }}">
+
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem;">Select Payment Method</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <label style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+          <input type="radio" name="payment_method" value="UPI / Google Pay" checked style="accent-color: var(--primary);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">UPI / GPay</div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Instant Scan & Pay</span>
+          </div>
+        </label>
+
+        <label style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+          <input type="radio" name="payment_method" value="Credit / Debit Card" style="accent-color: var(--primary);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Credit / Debit Card</div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Visa, MasterCard, Amex</span>
+          </div>
+        </label>
+
+        <label style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.75rem;">
+          <input type="radio" name="payment_method" value="Net Banking" style="accent-color: var(--primary);">
+          <div>
+            <div style="font-weight: 600; font-size: 0.95rem;">Net Banking</div>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">All Major Banks</span>
+          </div>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+        <i class="fas fa-lock"></i> Pay ₹{{ "{:,.2f}".format(booking.price) }} & Confirm Booking
+      </button>
+    </form>
+
+  </div>
+</div>
+{% endblock %}

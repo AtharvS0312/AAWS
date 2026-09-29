@@ -1,0 +1,11 @@
+{
+  "demo@travelgo.com": {
+    "email": "demo@travelgo.com",
+    "name": "Alex Morgan",
+    "password": "scrypt:32768:8:1$pGsTWPCPMvJ3LYUf$8f161d9ab8eb67c4ff25cb790086b43a4ac145cdc708ec50744aed03363f5402879c2a83eb5fd21b28a9ee5067d1d9e93cb1aea8e3f5f453c3577560b0e4796b",
+    "logins": [
+      "2026-09-26 22:22:12"
+    ],
+    "created_at": "2026-09-26 22:22:12"
+  }
+}

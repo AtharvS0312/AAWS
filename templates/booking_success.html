@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Confirmed | TravelGo{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 3rem auto; padding: 0 1.5rem; text-align: center;">
+  
+  <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); padding: 3rem; box-shadow: 0 25px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden;">
+    
+    <div style="width: 90px; height: 90px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 2px solid var(--accent-emerald); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; margin: 0 auto 1.5rem auto; box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);">
+      <i class="fas fa-check"></i>
+    </div>
+
+    <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; color: white;">Booking Confirmed!</h1>
+    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 2rem;">
+      Your travel reservation has been successfully registered in Amazon DynamoDB.
+    </p>
+
+    <!-- SNS Notification Alert Banner -->
+    <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid var(--primary); border-radius: var(--radius-md); padding: 1.25rem; text-align: left; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center;">
+      <i class="fas fa-paper-plane" style="font-size: 1.8rem; color: var(--primary);"></i>
+      <div>
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: white;">AWS SNS Real-Time Email Triggered</h4>
+        <p style="font-size: 0.85rem; color: #cbd5e1; margin-top: 2px;">
+          A real-time confirmation payload was published via AWS SNS to <strong>{{ booking.email }}</strong>.
+          <span style="display: block; font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Provider: {{ booking.sns_notification.provider }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- TICKET RECEIPT TILE -->
+    <div style="background: rgba(15, 23, 42, 0.7); border: 2px dashed var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.75rem; text-align: left; margin-bottom: 2rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Booking Reference</span>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--primary);">{{ booking.booking_id }}</div>
+        </div>
+        <span class="status-badge status-confirmed">CONFIRMED</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.25rem; font-size: 0.9rem;">
+        <div>
+          <span style="color: var(--text-muted); display: block;">Traveler Email</span>
+          <strong>{{ booking.email }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Type / Mode</span>
+          <strong style="text-transform: uppercase;">{{ booking.type }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Route / Destination</span>
+          <strong>{{ booking.source }} ➔ {{ booking.destination }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Date</span>
+          <strong>{{ booking.date }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Seat / Room</span>
+          <strong>{{ booking.seat }}</strong>
+        </div>
+
+        <div>
+          <span style="color: var(--text-muted); display: block;">Payment Reference</span>
+          <strong style="color: var(--accent-amber);">{{ booking.payment_reference }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary" style="padding: 0.8rem 1.6rem;">
+        <i class="fas fa-list-check"></i> View In My Dashboard
+      </a>
+      <button onclick="window.print()" class="btn btn-outline" style="padding: 0.8rem 1.4rem;">
+        <i class="fas fa-print"></i> Print Receipt
+      </button>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

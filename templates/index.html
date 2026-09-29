@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}TravelGo | Unified Bus, Train, Flight & Hotel Booking{% endblock %}
+
+{% block content %}
+<!-- HERO & SEARCH TABS -->
+<section class="hero">
+  <h1 class="hero-title">Travel Without Boundaries</h1>
+  <p class="hero-subtitle">
+    Book buses, express trains, flights, and luxury hotels in one place with real-time AWS SNS notifications and instant confirmation.
+  </p>
+
+  <div class="search-card-container">
+    <!-- Tab Switcher -->
+    <div class="search-tabs">
+      <button class="tab-btn active" data-type="bus">
+        <i class="fas fa-bus"></i> Bus
+      </button>
+      <button class="tab-btn" data-type="train">
+        <i class="fas fa-train"></i> Train
+      </button>
+      <button class="tab-btn" data-type="flight">
+        <i class="fas fa-plane"></i> Flight
+      </button>
+      <button class="tab-btn" data-type="hotel">
+        <i class="fas fa-hotel"></i> Hotel
+      </button>
+    </div>
+
+    <!-- Unified Search Form -->
+    <form action="{{ url_for('search') }}" method="GET" class="search-form-grid">
+      <input type="hidden" name="type" id="search-type-input" value="bus">
+
+      <div class="form-group">
+        <label><i class="fas fa-location-crosshairs"></i> From</label>
+        <input type="text" name="source" class="form-input" placeholder="e.g. Hyderabad" value="Hyderabad">
+      </div>
+
+      <div class="form-group">
+        <label id="dest-label"><i class="fas fa-location-dot"></i> Destination</label>
+        <input type="text" name="destination" class="form-input" placeholder="e.g. Bangalore" value="Bangalore">
+      </div>
+
+      <div class="form-group">
+        <label><i class="fas fa-calendar-day"></i> Travel Date</label>
+        <input type="date" name="date" class="form-input" value="2026-10-15">
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+          <i class="fas fa-magnifying-glass"></i> Search
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- FEATURED SERVICES & PROMOS -->
+<section style="max-width: 1250px; margin: 3rem auto; padding: 0 1.5rem;">
+  <div style="text-align: center; margin-bottom: 2.5rem;">
+    <h2 class="section-title">Why TravelGo Cloud Experience?</h2>
+    <p class="section-subtitle">Scalable, transparent, and instant multi-mode booking infrastructure.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.75rem; transition: transform 0.2s ease;">
+      <div style="width: 50px; height: 50px; border-radius: var(--radius-md); background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <i class="fas fa-couch"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: white;">Interactive Seat Maps</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Pick your exact seat in real-time with lower & upper sleeper deck visual grids and window preference.
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.75rem; transition: transform 0.2s ease;">
+      <div style="width: 50px; height: 50px; border-radius: var(--radius-md); background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <i class="fas fa-bell"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: white;">Real-Time AWS SNS Alerts</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Get instant email confirmation and cancellation alerts directly from AWS Simple Notification Service.
+      </p>
+    </div>
+
+    <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.75rem; transition: transform 0.2s ease;">
+      <div style="width: 50px; height: 50px; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.25rem;">
+        <i class="fas fa-database"></i>
+      </div>
+      <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: white;">DynamoDB Travel Vault</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        All user travel history and transactions are persistently stored with sub-millisecond latency on Amazon DynamoDB.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR ROUTES & HOTELS PREVIEW -->
+<section style="max-width: 1250px; margin: 3rem auto; padding: 0 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+    <div>
+      <h2 class="section-title">Popular Bus Routes</h2>
+      <p class="section-subtitle" style="margin-bottom: 0;">Top choices for travelers right now</p>
+    </div>
+    <a href="{{ url_for('search', type='bus') }}" class="btn btn-outline">View All Buses <i class="fas fa-arrow-right"></i></a>
+  </div>
+
+  <div class="listings-grid">
+    {% for bus in listings.buses[:3] %}
+      <div class="travel-card">
+        <span class="card-badge badge-bus">BUS</span>
+        
+        <div class="card-header">
+          <h3 class="card-title">{{ bus.operator }}</h3>
+          <p class="card-subtitle">{{ bus.bus_type }}</p>
+        </div>
+
+        <div class="timing-row">
+          <div class="time-box">
+            <div class="time">{{ bus.departure_time }}</div>
+            <div class="city">{{ bus.source }}</div>
+          </div>
+          <div class="duration-line">
+            <span>{{ bus.duration }}</span>
+            <div class="line-bar"></div>
+          </div>
+          <div class="time-box">
+            <div class="time">{{ bus.arrival_time }}</div>
+            <div class="city">{{ bus.destination }}</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+          {% for am in bus.amenities[:3] %}
+            <span style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.05); padding: 0.2rem 0.5rem; border-radius: 4px; color: var(--text-muted);">{{ am }}</span>
+          {% endfor %}
+        </div>
+
+        <div class="card-footer">
+          <div class="price-tag">₹{{ "{:,.0f}".format(bus.price) }} <span>/ seat</span></div>
+          <a href="{{ url_for('bus_seats', bus_id=bus.id) }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.88rem;">
+            Select Seats <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- POPULAR HOTELS PREVIEW -->
+<section style="max-width: 1250px; margin: 3rem auto; padding: 0 1.5rem;">
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+    <div>
+      <h2 class="section-title">Top Stay Stays & Resorts</h2>
+      <p class="section-subtitle" style="margin-bottom: 0;">Handpicked luxury and budget accommodations</p>
+    </div>
+    <a href="{{ url_for('search', type='hotel') }}" class="btn btn-outline">View All Hotels <i class="fas fa-arrow-right"></i></a>
+  </div>
+
+  <div class="listings-grid">
+    {% for hotel in listings.hotels[:3] %}
+      <div class="travel-card">
+        <span class="card-badge badge-hotel">{{ hotel.category }}</span>
+
+        <div style="height: 160px; border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem; background: #1e293b;">
+          <img src="{{ hotel.image }}" alt="{{ hotel.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        
+        <div class="card-header">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h3 class="card-title" style="font-size: 1.1rem;">{{ hotel.name }}</h3>
+            <span style="color: #f59e0b; font-size: 0.85rem; font-weight: 700;"><i class="fas fa-star"></i> {{ hotel.rating }}</span>
+          </div>
+          <p class="card-subtitle"><i class="fas fa-location-dot"></i> {{ hotel.address }}</p>
+        </div>
+
+        <div class="card-footer">
+          <div class="price-tag">₹{{ "{:,.0f}".format(hotel.price_per_night) }} <span>/ night</span></div>
+          <a href="{{ url_for('hotel_details', hotel_id=hotel.id) }}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.88rem;">
+            View Rooms <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

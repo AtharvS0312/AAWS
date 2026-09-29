@@ -1,0 +1,283 @@
+{% extends 'base.html' %}
+
+{% block title %}Search {{ travel_type.upper() }}s | TravelGo Platform{% endblock %}
+
+{% block content %}
+<div style="max-width: 1300px; margin: 2rem auto; padding: 0 1.5rem;">
+  
+  <!-- SEARCH BAR HEADER -->
+  <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+    <form action="{{ url_for('search') }}" method="GET" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 130px; gap: 1rem; align-items: end;">
+      <div class="form-group">
+        <label>Type</label>
+        <select name="type" class="form-select" onchange="this.form.submit()">
+          <option value="bus" {% if travel_type == 'bus' %}selected{% endif %}>🚌 Bus</option>
+          <option value="train" {% if travel_type == 'train' %}selected{% endif %}>🚆 Train</option>
+          <option value="flight" {% if travel_type == 'flight' %}selected{% endif %}>✈️ Flight</option>
+          <option value="hotel" {% if travel_type == 'hotel' %}selected{% endif %}>🏨 Hotel</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>From / Source</label>
+        <input type="text" name="source" class="form-input" value="{{ source }}" placeholder="Source City">
+      </div>
+
+      <div class="form-group">
+        <label>Destination / City</label>
+        <input type="text" name="destination" class="form-input" value="{{ destination }}" placeholder="Destination">
+      </div>
+
+      <div class="form-group">
+        <label>Travel Date</label>
+        <input type="date" name="date" class="form-input" value="{{ date }}">
+      </div>
+
+      <div class="form-group">
+        <button type="submit" class="btn btn-primary" style="padding: 0.85rem;">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 260px 1fr; gap: 2rem;">
+    
+    <!-- SIDEBAR FILTERS -->
+    <aside style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 1.5rem; height: fit-content;">
+      <h3 style="font-size: 1.1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+        <span><i class="fas fa-sliders"></i> Refine Search</span>
+        <a href="{{ url_for('search', type=travel_type) }}" style="font-size: 0.8rem; color: var(--text-muted);">Reset</a>
+      </h3>
+
+      <div style="margin-bottom: 1.5rem;">
+        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Price Filter</label>
+        <input type="range" id="priceRange" min="300" max="10000" step="200" value="{{ max_price or 10000 }}" style="width: 100%; accent-color: var(--primary);" oninput="document.getElementById('priceVal').innerText = this.value">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">
+          <span>₹300</span>
+          <span>Max: ₹<span id="priceVal">{{ max_price or 10000 }}</span></span>
+        </div>
+      </div>
+
+      {% if travel_type == 'hotel' %}
+        <div style="margin-bottom: 1.5rem;">
+          <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">Hotel Category</label>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="cat" onclick="location.href='{{ url_for('search', type='hotel', category='all') }}'" {% if category == 'all' %}checked{% endif %}> All Categories
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="cat" onclick="location.href='{{ url_for('search', type='hotel', category='Luxury') }}'" {% if category == 'Luxury' %}checked{% endif %}> Luxury (5★ / 4★)
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="cat" onclick="location.href='{{ url_for('search', type='hotel', category='Mid-Range') }}'" {% if category == 'Mid-Range' %}checked{% endif %}> Mid-Range (3★)
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="radio" name="cat" onclick="location.href='{{ url_for('search', type='hotel', category='Budget') }}'" {% if category == 'Budget' %}checked{% endif %}> Budget / Backpackers
+            </label>
+          </div>
+        </div>
+      {% endif %}
+
+      <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-md); padding: 1rem; font-size: 0.82rem; color: #cbd5e1;">
+        <i class="fas fa-shield-halved" style="color: var(--primary); margin-right: 4px;"></i>
+        All bookings on TravelGo come with instant AWS SNS notification & zero cancellation fees up to 24 hours prior.
+      </div>
+    </aside>
+
+    <!-- RESULTS LIST -->
+    <div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; font-weight: 700;">
+          Available {{ travel_type.upper() }} Options ({{ results|length }})
+        </h2>
+        <span style="font-size: 0.9rem; color: var(--text-muted);">
+          Showing results for <strong style="color: white;">{{ source or 'Any' }}</strong> ➔ <strong style="color: white;">{{ destination or 'Any' }}</strong>
+        </span>
+      </div>
+
+      {% if not results %}
+        <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 3rem; text-align: center;">
+          <i class="fas fa-plane-slash" style="font-size: 3rem; color: var(--text-dim); margin-bottom: 1rem;"></i>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">No {{ travel_type }} options matched your criteria</h3>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Try changing your search parameters or dates to explore available routes.</p>
+          <a href="{{ url_for('search', type=travel_type) }}" class="btn btn-primary">Clear Filters</a>
+        </div>
+      {% else %}
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          
+          <!-- BUS RESULTS -->
+          {% if travel_type == 'bus' %}
+            {% for bus in results %}
+              <div class="travel-card" style="flex-direction: row; align-items: center; gap: 2rem;">
+                <span class="card-badge badge-bus">BUS</span>
+                <div style="flex: 2;">
+                  <h3 class="card-title">{{ bus.operator }}</h3>
+                  <p class="card-subtitle">{{ bus.bus_type }}</p>
+                  
+                  <div class="timing-row" style="margin: 0.85rem 0;">
+                    <div class="time-box">
+                      <div class="time">{{ bus.departure_time }}</div>
+                      <div class="city">{{ bus.source }}</div>
+                    </div>
+                    <div class="duration-line">
+                      <span>{{ bus.duration }}</span>
+                      <div class="line-bar"></div>
+                    </div>
+                    <div class="time-box">
+                      <div class="time">{{ bus.arrival_time }}</div>
+                      <div class="city">{{ bus.destination }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="flex: 1; border-left: 1px solid var(--bg-card-border); padding-left: 1.5rem; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.75rem;">
+                  <div class="price-tag">₹{{ "{:,.0f}".format(bus.price) }} <span style="font-size: 0.8rem; color: var(--text-muted);">/ seat</span></div>
+                  <div style="font-size: 0.8rem; color: var(--accent-emerald); font-weight: 600;">
+                    <i class="fas fa-chair"></i> {{ bus.available_seats_count }} Seats Available
+                  </div>
+                  <a href="{{ url_for('bus_seats', bus_id=bus.id, date=date) }}" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; width: 100%;">
+                    Select Seat <i class="fas fa-chevron-right"></i>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+
+          <!-- TRAIN RESULTS -->
+          {% elif travel_type == 'train' %}
+            {% for train in results %}
+              <div class="travel-card">
+                <span class="card-badge badge-train">TRAIN #{{ train.train_number }}</span>
+                <div class="card-header">
+                  <h3 class="card-title">{{ train.name }}</h3>
+                  <p class="card-subtitle">Runs: {{ train.runs_on }}</p>
+                </div>
+
+                <div class="timing-row">
+                  <div class="time-box">
+                    <div class="time">{{ train.departure_time }}</div>
+                    <div class="city">{{ train.source }}</div>
+                  </div>
+                  <div class="duration-line">
+                    <span>{{ train.duration }}</span>
+                    <div class="line-bar"></div>
+                  </div>
+                  <div class="time-box">
+                    <div class="time">{{ train.arrival_time }}</div>
+                    <div class="city">{{ train.destination }}</div>
+                  </div>
+                </div>
+
+                <!-- Classes selection -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
+                  {% for cls in train.classes %}
+                    <form action="{{ url_for('checkout') }}" method="POST" style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 0.75rem; text-align: center;">
+                      <input type="hidden" name="item_id" value="{{ train.id }}">
+                      <input type="hidden" name="type" value="train">
+                      <input type="hidden" name="date" value="{{ date }}">
+                      <input type="hidden" name="source" value="{{ train.source }}">
+                      <input type="hidden" name="destination" value="{{ train.destination }}">
+                      <input type="hidden" name="seat" value="Class {{ cls.code }} - {{ cls.name }}">
+                      <input type="hidden" name="price" value="{{ cls.price }}">
+                      <input type="hidden" name="details" value="{{ train.name }} (Train #{{ train.train_number }}) • Class {{ cls.code }}">
+
+                      <div style="font-weight: 700; font-size: 0.9rem; color: white;">{{ cls.name }} ({{ cls.code }})</div>
+                      <div style="color: var(--accent-emerald); font-size: 0.78rem; font-weight: 600; margin: 2px 0;">{{ cls.status }}</div>
+                      <div style="font-weight: 800; font-size: 1.05rem; margin-bottom: 0.4rem;">₹{{ "{:,.0f}".format(cls.price) }}</div>
+                      <button type="submit" class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.78rem; width: 100%;">
+                        Book Class
+                      </button>
+                    </form>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endfor %}
+
+          <!-- FLIGHT RESULTS -->
+          {% elif travel_type == 'flight' %}
+            {% for flt in results %}
+              <div class="travel-card" style="flex-direction: row; align-items: center; gap: 2rem;">
+                <span class="card-badge badge-flight">{{ flt.airline }}</span>
+                <div style="flex: 2;">
+                  <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <i class="fas fa-plane" style="color: var(--secondary); font-size: 1.3rem;"></i>
+                    <h3 class="card-title" style="margin-bottom: 0;">{{ flt.airline }} • {{ flt.flight_number }}</h3>
+                  </div>
+                  <p class="card-subtitle">{{ flt.class }} • {{ flt.baggage }}</p>
+
+                  <div class="timing-row" style="margin: 0.85rem 0;">
+                    <div class="time-box">
+                      <div class="time">{{ flt.departure_time }}</div>
+                      <div class="city">{{ flt.source }}</div>
+                    </div>
+                    <div class="duration-line">
+                      <span>{{ flt.duration }} ({{ flt.stops }})</span>
+                      <div class="line-bar"></div>
+                    </div>
+                    <div class="time-box">
+                      <div class="time">{{ flt.arrival_time }}</div>
+                      <div class="city">{{ flt.destination }}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="flex: 1; border-left: 1px solid var(--bg-card-border); padding-left: 1.5rem; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.75rem;">
+                  <div class="price-tag">₹{{ "{:,.0f}".format(flt.price) }}</div>
+                  
+                  <form action="{{ url_for('checkout') }}" method="POST" style="width: 100%;">
+                    <input type="hidden" name="item_id" value="{{ flt.id }}">
+                    <input type="hidden" name="type" value="flight">
+                    <input type="hidden" name="date" value="{{ date }}">
+                    <input type="hidden" name="source" value="{{ flt.source }}">
+                    <input type="hidden" name="destination" value="{{ flt.destination }}">
+                    <input type="hidden" name="seat" value="Seat Assigned at Check-in (Window/Aisle)">
+                    <input type="hidden" name="price" value="{{ flt.price }}">
+                    <input type="hidden" name="details" value="{{ flt.airline }} {{ flt.flight_number }} • {{ flt.class }}">
+                    
+                    <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; width: 100%;">
+                      Book Flight <i class="fas fa-chevron-right"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% endfor %}
+
+          <!-- HOTEL RESULTS -->
+          {% elif travel_type == 'hotel' %}
+            {% for hotel in results %}
+              <div class="travel-card" style="flex-direction: row; align-items: center; gap: 2rem;">
+                <div style="width: 220px; height: 160px; border-radius: var(--radius-md); overflow: hidden; flex-shrink: 0; background: #1e293b;">
+                  <img src="{{ hotel.image }}" alt="{{ hotel.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+
+                <div style="flex: 2;">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <h3 class="card-title">{{ hotel.name }}</h3>
+                    <span style="color: #f59e0b; font-size: 0.9rem; font-weight: 700;"><i class="fas fa-star"></i> {{ hotel.rating }} ({{ hotel.reviews }})</span>
+                  </div>
+                  <p class="card-subtitle" style="margin-bottom: 0.75rem;"><i class="fas fa-location-dot"></i> {{ hotel.address }}</p>
+                  
+                  <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    {% for am in hotel.amenities[:4] %}
+                      <span style="font-size: 0.75rem; background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 0.2rem 0.5rem; border-radius: 4px;">{{ am }}</span>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div style="flex: 1; border-left: 1px solid var(--bg-card-border); padding-left: 1.5rem; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.75rem;">
+                  <div class="price-tag">₹{{ "{:,.0f}".format(hotel.price_per_night) }} <span style="font-size: 0.8rem; color: var(--text-muted);">/ night</span></div>
+                  <a href="{{ url_for('hotel_details', hotel_id=hotel.id, date=date) }}" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem; width: 100%;">
+                    Select Room <i class="fas fa-chevron-right"></i>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}User Dashboard | TravelGo Cloud Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard-grid">
+  
+  <!-- LEFT SIDEBAR: PROFILE & STATS -->
+  <div>
+    <div class="user-profile-card">
+      <div class="avatar-circle">
+        <i class="fas fa-user"></i>
+      </div>
+      <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.25rem;">{{ current_user.name }}</h2>
+      <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.25rem;">{{ current_user.email }}</p>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; text-align: left; font-size: 0.82rem; color: var(--text-muted);">
+        <div style="margin-bottom: 0.4rem;"><i class="fas fa-calendar"></i> Joined: {{ current_user.created_at[:10] if current_user.created_at else '2026' }}</div>
+        <div><i class="fas fa-clock-rotate-left"></i> Logins: {{ current_user.logins|length if current_user.logins else 1 }} sessions</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT MAIN: TRAVEL HISTORY & CATEGORIES -->
+  <div>
+    <!-- STATS ROW -->
+    <div class="stat-pills-row">
+      <div class="stat-pill">
+        <div class="stat-value" style="color: var(--primary);">{{ bookings|length }}</div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-value" style="color: #34d399;">{{ confirmed_count }}</div>
+        <div class="stat-label">Active / Confirmed</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-value" style="color: var(--accent-cyan);">₹{{ "{:,.0f}".format(total_spent) }}</div>
+        <div class="stat-label">Total Spent</div>
+      </div>
+    </div>
+
+    <!-- BOOKINGS HEADER & FILTER TABS -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="font-size: 1.5rem; font-weight: 700;">Personal Travel History</h2>
+      
+      <div style="font-size: 0.85rem; color: var(--text-muted);">
+        <i class="fas fa-database"></i> Source: <strong>{% if aws_available %}Amazon DynamoDB{% else %}Local Store{% endif %}</strong>
+      </div>
+    </div>
+
+    {% if not bookings %}
+      <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-lg); padding: 3rem; text-align: center;">
+        <i class="fas fa-ticket-simple" style="font-size: 3rem; color: var(--text-dim); margin-bottom: 1rem;"></i>
+        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">No Travel History Found</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">You haven't made any bookings yet. Start planning your journey now!</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Book Travel Now</a>
+      </div>
+    {% else %}
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        {% for b in bookings %}
+          <div class="booking-history-item" id="booking-item-{{ b.booking_id }}">
+            <div style="display: flex; align-items: center; gap: 1.25rem; flex: 2;">
+              <div style="width: 48px; height: 48px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;"
+                   class="{% if b.type == 'bus' %}badge-bus{% elif b.type == 'train' %}badge-train{% elif b.type == 'flight' %}badge-flight{% else %}badge-hotel{% endif %}">
+                {% if b.type == 'bus' %}
+                  <i class="fas fa-bus"></i>
+                {% elif b.type == 'train' %}
+                  <i class="fas fa-train"></i>
+                {% elif b.type == 'flight' %}
+                  <i class="fas fa-plane"></i>
+                {% else %}
+                  <i class="fas fa-hotel"></i>
+                {% endif %}
+              </div>
+
+              <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <h4 style="font-size: 1.1rem; font-weight: 700; color: white;">{{ b.booking_id }}</h4>
+                  <span id="status-badge-{{ b.booking_id }}" class="status-badge {% if b.status == 'CONFIRMED' %}status-confirmed{% else %}status-cancelled{% endif %}">
+                    {{ b.status }}
+                  </span>
+                </div>
+                
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 2px;">
+                  {{ b.details }}
+                </p>
+
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; display: flex; gap: 1rem;">
+                  <span><i class="fas fa-route"></i> Route: {{ b.source }} ➔ {{ b.destination }}</span>
+                  <span><i class="fas fa-calendar"></i> Date: {{ b.date }}</span>
+                  <span><i class="fas fa-chair"></i> Seat/Room: {{ b.seat }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+              <div style="font-size: 1.3rem; font-weight: 800; color: white;">₹{{ "{:,.2f}".format(b.price) }}</div>
+              <div style="font-size: 0.78rem; color: var(--text-dim);">Ref: {{ b.payment_reference }}</div>
+
+              {% if b.status == 'CONFIRMED' %}
+                <button class="btn btn-danger btn-cancel-booking" data-booking-id="{{ b.booking_id }}" style="padding: 0.35rem 0.75rem; font-size: 0.78rem;">
+                  Cancel Booking
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

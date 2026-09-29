@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ hotel.name }} | Hotel Reservation | TravelGo{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
+  
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('search', type='hotel') }}" class="btn btn-outline" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+      <i class="fas fa-arrow-left"></i> Back to Hotels
+    </a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 380px; gap: 2rem;">
+    
+    <!-- HOTEL OVERVIEW & ROOM OPTIONS -->
+    <div>
+      <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); overflow: hidden; padding: 1.75rem; margin-bottom: 2rem;">
+        <div style="height: 320px; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1.5rem; background: #1e293b;">
+          <img src="{{ hotel.image }}" alt="{{ hotel.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem;">
+          <div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.25rem;">{{ hotel.name }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;"><i class="fas fa-location-dot"></i> {{ hotel.address }}</p>
+          </div>
+          <span style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); padding: 0.4rem 0.85rem; border-radius: 50px; font-weight: 700; font-size: 0.9rem;">
+            <i class="fas fa-star"></i> {{ hotel.rating }} / 5.0 ({{ hotel.reviews }} Reviews)
+          </span>
+        </div>
+
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem;">Amenities & Features</h3>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          {% for am in hotel.amenities %}
+            <span style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); padding: 0.4rem 0.85rem; border-radius: var(--radius-sm); font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.4rem;">
+              <i class="fas fa-check" style="color: var(--accent-emerald);"></i> {{ am }}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- ROOM SELECTION OPTIONS -->
+      <div style="background: var(--bg-card); border: 1px solid var(--bg-card-border); border-radius: var(--radius-xl); padding: 1.75rem;">
+        <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1.25rem;">Select Available Room</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          {% for room in hotel.rooms %}
+            <label style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <input type="radio" name="room_option" class="room-select-radio" data-room-name="{{ room.name }}" data-room-price="{{ room.price }}" {% if loop.first %}checked{% endif %} style="accent-color: var(--primary); width: 18px; height: 18px;">
+                <div>
+                  <h4 style="font-size: 1.1rem; font-weight: 700;">{{ room.name }}</h4>
+                  <span style="font-size: 0.82rem; color: var(--text-muted);"><i class="fas fa-user-group"></i> Max Occupancy: {{ room.capacity }}</span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.3rem; font-weight: 800; color: white;">₹{{ "{:,.0f}".format(room.price) }}</div>
+                <span style="font-size: 0.78rem; color: var(--text-muted);">per night</span>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR RESERVATION SUMMARY -->
+    <div class="booking-summary-sidebar">
+      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 0.75rem;">
+        Reservation Summary
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Check-in Date:</span>
+          <strong>{{ date }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Location:</span>
+          <strong>{{ hotel.city }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Category:</span>
+          <strong>{{ hotel.category }}</strong>
+        </div>
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.9rem; color: var(--text-muted);">Total Price</span>
+          <span id="hotel-price-display" style="font-size: 1.5rem; font-weight: 800; color: white;">₹{{ "{:,.0f}".format(hotel.rooms[0].price) }}</span>
+        </div>
+      </div>
+
+      <form action="{{ url_for('checkout') }}" method="POST">
+        <input type="hidden" name="item_id" value="{{ hotel.id }}">
+        <input type="hidden" name="type" value="hotel">
+        <input type="hidden" name="date" value="{{ date }}">
+        <input type="hidden" name="source" value="{{ hotel.city }}">
+        <input type="hidden" name="destination" value="{{ hotel.city }}">
+        <input type="hidden" id="selected-room-input" name="seat" value="{{ hotel.rooms[0].name }}">
+        <input type="hidden" id="hotel-form-price" name="price" value="{{ hotel.rooms[0].price }}">
+        <input type="hidden" name="details" value="{{ hotel.name }} • {{ hotel.category }}">
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem;">
+          Reserve Room Now <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

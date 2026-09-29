@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Bus Seats | {{ bus.operator }} | TravelGo{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
+  
+  <div style="margin-bottom: 1.5rem;">
+    <a href="{{ url_for('search', type='bus') }}" class="btn btn-outline" style="padding: 0.4rem 0.85rem; font-size: 0.85rem;">
+      <i class="fas fa-arrow-left"></i> Back to Bus Listings
+    </a>
+  </div>
+
+  <div class="seat-selection-container">
+    
+    <!-- SEAT MAP CABIN -->
+    <div class="bus-cabin-card">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+          <h2 style="font-size: 1.5rem; font-weight: 700;">{{ bus.operator }}</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">{{ bus.bus_type }}</p>
+        </div>
+        <span class="card-badge badge-bus">{{ bus.source }} ➔ {{ bus.destination }}</span>
+      </div>
+
+      <!-- Steering / Driver Row -->
+      <div class="steering-header">
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.85rem;">
+          <i class="fas fa-calendar-day"></i> Date: <strong>{{ date }}</strong>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+          <span>Driver Cabin</span>
+          <i class="fas fa-dharmachakra steering-icon"></i>
+        </div>
+      </div>
+
+      <!-- Seat Legend -->
+      <div class="seat-legend">
+        <div class="legend-item">
+          <div class="seat-box-sample sample-available"></div> Available
+        </div>
+        <div class="legend-item">
+          <div class="seat-box-sample sample-selected"></div> Selected
+        </div>
+        <div class="legend-item">
+          <div class="seat-box-sample sample-booked"></div> Booked
+        </div>
+      </div>
+
+      <!-- Interactive Bus Seats Grid (Lower Deck) -->
+      <div style="text-align: center; margin-bottom: 1rem; color: var(--primary); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">
+        LOWER DECK (SLEEPER / SEMI-SLEEPER)
+      </div>
+
+      <div class="seats-grid-cabin">
+        <!-- Row 1 -->
+        <div class="seat-item" data-seat="L-01 (Window)">L01</div>
+        <div class="seat-item" data-seat="L-02">L02</div>
+        <div class="aisle-gap"></div>
+        <div class="seat-item booked" data-seat="L-03">L03</div>
+        
+        <!-- Row 2 -->
+        <div class="seat-item" data-seat="L-04 (Window)">L04</div>
+        <div class="seat-item" data-seat="L-05">L05</div>
+        <div class="aisle-gap"></div>
+        <div class="seat-item" data-seat="L-06 (Window)">L06</div>
+        
+        <!-- Row 3 -->
+        <div class="seat-item booked" data-seat="L-07">L07</div>
+        <div class="seat-item" data-seat="L-08 (Window)">L08</div>
+        <div class="aisle-gap"></div>
+        <div class="seat-item" data-seat="L-09">L09</div>
+
+        <!-- Row 4 -->
+        <div class="seat-item" data-seat="L-10 (Window)">L10</div>
+        <div class="seat-item" data-seat="L-11">L11</div>
+        <div class="aisle-gap"></div>
+        <div class="seat-item booked" data-seat="L-12">L12</div>
+
+        <!-- Row 5 -->
+        <div class="seat-item" data-seat="L-13 (Window)">L13</div>
+        <div class="seat-item" data-seat="L-14">L14</div>
+        <div class="aisle-gap"></div>
+        <div class="seat-item" data-seat="L-15 (Window)">L15</div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR SUMMARY & CHECKOUT FORM -->
+    <div class="booking-summary-sidebar">
+      <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 1.25rem; border-bottom: 1px solid var(--bg-card-border); padding-bottom: 0.75rem;">
+        Trip Summary
+      </h3>
+
+      <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem; font-size: 0.9rem;">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Route:</span>
+          <strong>{{ bus.source }} ➔ {{ bus.destination }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Departure:</span>
+          <strong>{{ bus.departure_time }} ({{ date }})</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Operator:</span>
+          <strong>{{ bus.operator }}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-muted);">Selected Seat:</span>
+          <strong id="selected-seat-display" style="color: var(--primary);">None selected</strong>
+        </div>
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--bg-card-border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.9rem; color: var(--text-muted);">Total Amount</span>
+          <span id="total-price-display" style="font-size: 1.5rem; font-weight: 800; color: white;">₹0</span>
+        </div>
+      </div>
+
+      <form action="{{ url_for('checkout') }}" method="POST">
+        <input type="hidden" name="item_id" value="{{ bus.id }}">
+        <input type="hidden" name="type" value="bus">
+        <input type="hidden" name="date" value="{{ date }}">
+        <input type="hidden" name="source" value="{{ bus.source }}">
+        <input type="hidden" name="destination" value="{{ bus.destination }}">
+        <input type="hidden" id="selected-seat-input" name="seat" value="">
+        <input type="hidden" id="base-bus-price" value="{{ bus.price }}">
+        <input type="hidden" id="price-input" name="price" value="{{ bus.price }}">
+        <input type="hidden" name="details" value="{{ bus.operator }} • {{ bus.bus_type }}">
+
+        <button type="submit" id="proceed-checkout-btn" class="btn btn-outline" style="width: 100%; padding: 0.85rem;" disabled>
+          Proceed to Checkout <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
